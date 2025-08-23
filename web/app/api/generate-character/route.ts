@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PinataSDK } from "pinata";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,22 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Check if Pinata JWT is configured
+    const pinataJwt = process.env.PINATA_JWT;
+    if (!pinataJwt) {
+      return NextResponse.json(
+        { error: "Pinata JWT not configured" },
+        { status: 500 }
+      );
+    }
+
+    // Initialize Pinata SDK
+    const pinata = new PinataSDK({
+      pinataJwt: pinataJwt,
+      pinataGateway:
+        process.env.GATEWAY_URL || "orange-select-opossum-767.mypinata.cloud",
+    });
 
     // Check if OpenAI API key is configured
     const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -55,6 +72,34 @@ export async function POST(request: NextRequest) {
     const imageData = await imageResponse.json();
     const imageUrl = imageData.data[0].url;
 
+    const openaiImageUrl = imageData.data[0].url;
+
+    // Download the generated image
+    console.log("Downloading image from OpenAI:", openaiImageUrl);
+    const imageDownloadResponse = await fetch(openaiImageUrl);
+
+    if (!imageDownloadResponse.ok) {
+      throw new Error("Failed to download generated image");
+    }
+
+    // Convert the image to a File object for Pinata upload
+    const imageBuffer = await imageDownloadResponse.arrayBuffer();
+    const imageBlob = new Blob([imageBuffer], { type: "image/png" });
+    const imageFile = new File([imageBlob], `village-${Date.now()}.png`, {
+      type: "image/png",
+    });
+
+    // Upload image to Pinata
+    console.log("Uploading image to Pinata...");
+    const pinataUpload = await pinata.upload.public.file(imageFile);
+    console.log("Pinata upload successful:", pinataUpload);
+
+    // Get the IPFS hash from the upload response
+    const ipfsHash = pinataUpload.cid;
+    if (!ipfsHash) {
+      throw new Error("Failed to get IPFS hash from Pinata upload");
+    }
+
     // Generate ERC721 Metadata using GPT
     const metadataResponse = await fetch(
       "https://api.openai.com/v1/chat/completions",
@@ -73,7 +118,7 @@ export async function POST(request: NextRequest) {
             },
             {
               role: "user",
-              content: `Generate NFT metadata for this character: ${characterDescription}. The image URL is ${imageUrl}`,
+              content: `Generate NFT metadata for this character: ${characterDescription}. The image URL is https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
             },
           ],
           temperature: 0.8,

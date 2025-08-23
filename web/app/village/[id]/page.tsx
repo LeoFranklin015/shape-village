@@ -48,14 +48,16 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   useEffect(() => {
     if (!villageData?.characters || villageData.characters.length < 2) return;
 
-    // Initialize character positions
+    // Initialize character positions across the full wander area
     const initialPositions = villageData.characters.map(
       (character: any, index: number) => ({
         id: character.id,
-        x: 50 + ((index * 120) % 400),
-        y: 50 + Math.floor((index * 120) / 400) * 120,
+        x: 50 + ((index * 150) % 600), // Spread across full width
+        y: 50 + Math.floor((index * 150) / 600) * 150, // Distribute vertically
         direction: Math.random() > 0.5 ? 1 : -1,
         speed: 0.5 + Math.random() * 1,
+        verticalDirection: Math.random() > 0.5 ? 1 : -1,
+        verticalSpeed: 0.3 + Math.random() * 0.7,
       })
     );
 
@@ -66,19 +68,25 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
       setCharacterPositions((prev) =>
         prev.map((pos) => {
           let newX = pos.x + pos.speed * pos.direction;
-          let newY = pos.y;
+          let newY = pos.y + pos.verticalSpeed * pos.verticalDirection;
 
-          // Bounce off boundaries
-          if (newX <= 30 || newX >= 370) {
+          // Bounce off horizontal boundaries (use full width)
+          if (newX <= 30 || newX >= 570) {
             pos.direction *= -1;
-            newX = Math.max(30, Math.min(370, newX));
+            newX = Math.max(30, Math.min(570, newX));
           }
 
-          // Add some vertical movement
-          if (Math.random() < 0.02) {
-            newY = Math.max(
-              30,
-              Math.min(170, pos.y + (Math.random() - 0.5) * 20)
+          // Bounce off vertical boundaries (use full height)
+          if (newY <= 30 || newY >= 570) {
+            pos.verticalDirection *= -1;
+            newY = Math.max(30, Math.min(570, newY));
+          }
+
+          // Add some random movement variation
+          if (Math.random() < 0.01) {
+            pos.speed = Math.max(
+              0.3,
+              Math.min(1.5, pos.speed + (Math.random() - 0.5) * 0.2)
             );
           }
 
@@ -360,9 +368,13 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
                                 // Use the same sprite assignment logic as the wander component
                                 const characterId = selectedCharacter.id;
                                 const spriteNumber =
-                                  parseInt(characterId.slice(-1), 16) % 2;
+                                  parseInt(characterId.slice(-1), 16) % 4;
                                 const spriteSrc =
-                                  spriteNumber === 0 ? "/1.png" : "/2.png";
+                                  spriteNumber === 0
+                                    ? "/1.png"
+                                    : spriteNumber === 1
+                                    ? "/2.png"
+                                    : "/3.png";
 
                                 return (
                                   <Image

@@ -90,50 +90,51 @@ export default function VillagePage() {
     }
     setShowHammer(true);
 
-    // const result = await generateVillage(villageDescription);
-    // if (result) {
-    //   // Merge image URL into metadata and print complete data
-    //   const completeVillageData = {
-    //     ...result.metadata,
-    //     imageUrl: result.imageUrl,
-    //   };
+    const result = await generateVillage(villageDescription);
+    if (result) {
+      // Merge image URL into metadata and print complete data
+      const completeVillageData = {
+        ...result.metadata,
+        imageUrl: result.imageUrl,
+      };
 
-    //   console.log("Complete Village Data:", completeVillageData);
+      console.log("Complete Village Data:", completeVillageData);
 
-    const completeVillageData = {
-      name: "Green Haven",
-      description:
-        "A serene, lush-green village with no houses in the centre but two well-maintained farmhouses situated in the corners.",
-      attributes: {
-        types: ["Rural"],
-        culture: "Agrarian",
-        resources: ["Vegetation", "Farmland"],
-      },
-      features: ["No central housing", "Two corner farmhouses"],
-      imageUrl:
-        "https://oaidalleapiprodscus.blob.core.windows.net/private/org-eNwqmSK4VURnx7crJShpR70R/user-7R6bXQRnfeUIT8AHHsmX6jlI/img-4Ju9efuqSW48sLJO5vBAZ9ce.png?st=2025-08-23T17%3A42%3A33Z&se=2025-08-23T19%3A42%3A33Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=8b33a531-2df9-46a3-bc02-d4b1430a422c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-23T18%3A42%3A33Z&ske=2025-08-24T18%3A42%3A33Z&sks=b&skv=2024-08-04&sig=Osovug5DeXMN5V/YwvAfJ6pgkjCDbho8LLpWlrTXE08%3D",
-    };
+      // const completeVillageData = {
+      //   name: "Green Haven",
+      //   description:
+      //     "A serene, lush-green village with no houses in the centre but two well-maintained farmhouses situated in the corners.",
+      //   attributes: {
+      //     types: ["Rural"],
+      //     culture: "Agrarian",
+      //     resources: ["Vegetation", "Farmland"],
+      //   },
+      //   features: ["No central housing", "Two corner farmhouses"],
+      //   imageUrl:
+      //     "https://oaidalleapiprodscus.blob.core.windows.net/private/org-eNwqmSK4VURnx7crJShpR70R/user-7R6bXQRnfeUIT8AHHsmX6jlI/img-4Ju9efuqSW48sLJO5vBAZ9ce.png?st=2025-08-23T17%3A42%3A33Z&se=2025-08-23T19%3A42%3A33Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=8b33a531-2df9-46a3-bc02-d4b1430a422c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-23T18%3A42%3A33Z&ske=2025-08-24T18%3A42%3A33Z&sks=b&skv=2024-08-04&sig=Osovug5DeXMN5V/YwvAfJ6pgkjCDbho8LLpWlrTXE08%3D",
+      // };
 
-    const tx = await walletClient?.writeContract({
-      address: VILLAGE_FACTORY_CONTRACT_ADDRESS as `0x${string}`,
-      abi: VILLAGE_FACTORY_ABI,
-      functionName: "createVillage",
-      args: [JSON.stringify(completeVillageData)],
-      account: address as `0x${string}`,
-    });
+      const tx = await walletClient?.writeContract({
+        address: VILLAGE_FACTORY_CONTRACT_ADDRESS as `0x${string}`,
+        abi: VILLAGE_FACTORY_ABI,
+        functionName: "createVillage",
+        args: [JSON.stringify(completeVillageData)],
+        account: address as `0x${string}`,
+      });
 
-    await client.waitForTransactionReceipt({ hash: tx as `0x${string}` });
-    setShowResults(true);
-    setIsModalOpen(false);
-    setShowHammer(false);
+      await client.waitForTransactionReceipt({ hash: tx as `0x${string}` });
+      setShowResults(true);
+      setIsModalOpen(false);
+      setShowHammer(false);
 
-    // Auto-close the results modal after 3 seconds
-    setTimeout(() => {
-      setShowResults(false);
-      reset();
-      setVillageDescription("");
-      refreshVillages(); // Refresh villages after successful creation
-    }, 3000);
+      // Auto-close the results modal after 3 seconds
+      setTimeout(() => {
+        setShowResults(false);
+        reset();
+        setVillageDescription("");
+        refreshVillages(); // Refresh villages after successful creation
+      }, 3000);
+    }
   };
 
   const clearError = () => {

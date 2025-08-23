@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PinataSDK } from "pinata";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +21,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate image using DALL-E
+    // Check if Pinata JWT is configured
+    const pinataJwt = process.env.PINATA_JWT;
+    if (!pinataJwt) {
+      return NextResponse.json(
+        { error: "Pinata JWT not configured" },
+        { status: 500 }
+      );
+    }
+
+    // Initialize Pinata SDK
+    const pinata = new PinataSDK({
+      pinataJwt: pinataJwt,
+      pinataGateway:
+        process.env.GATEWAY_URL || "orange-select-opossum-767.mypinata.cloud",
+    });
+
+    // Generate NFT-style village image using DALL·E
     const imageResponse = await fetch(
       "https://api.openai.com/v1/images/generations",
       {
@@ -31,7 +48,7 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           model: "dall-e-3",
-          prompt: `Create a beautiful, detailed village image which could be used as a bg in the website. But always make sure you cerate all the buildings , materails in the corners.  In  middle part of the image leave some space for the NPC TO move around. 
+          prompt: `Create a village image which could be used as a bg in the website. But always make sure you cerate everything asked only in the corners.  In  middle part of the image leave some space for the NPC TO move around. 
            description: ${villageDescription}. `,
           n: 1,
           size: "1792x1024",
@@ -50,8 +67,33 @@ export async function POST(request: NextRequest) {
     }
 
     const imageData = await imageResponse.json();
-    console.log(imageData);
-    const imageUrl = imageData.data[0].url;
+    const openaiImageUrl = imageData.data[0].url;
+
+    // Download the generated image
+    console.log("Downloading image from OpenAI:", openaiImageUrl);
+    const imageDownloadResponse = await fetch(openaiImageUrl);
+
+    if (!imageDownloadResponse.ok) {
+      throw new Error("Failed to download generated image");
+    }
+
+    // Convert the image to a File object for Pinata upload
+    const imageBuffer = await imageDownloadResponse.arrayBuffer();
+    const imageBlob = new Blob([imageBuffer], { type: "image/png" });
+    const imageFile = new File([imageBlob], `village-${Date.now()}.png`, {
+      type: "image/png",
+    });
+
+    // Upload image to Pinata
+    console.log("Uploading image to Pinata...");
+    const pinataUpload = await pinata.upload.public.file(imageFile);
+    console.log("Pinata upload successful:", pinataUpload);
+
+    // Get the IPFS hash from the upload response
+    const ipfsHash = pinataUpload.cid;
+    if (!ipfsHash) {
+      throw new Error("Failed to get IPFS hash from Pinata upload");
+    }
 
     // Generate metadata using GPT-4
     const metadataResponse = await fetch(
@@ -94,35 +136,32 @@ export async function POST(request: NextRequest) {
     let metadata;
 
     try {
-      // Try to parse the JSON response
       const content = metadataData.choices[0].message.content;
       metadata = JSON.parse(content);
+
+      // Update the image URL to use Pinata IPFS hash
+      metadata.image = `ipfs://${ipfsHash}`;
     } catch (parseError) {
-      // If parsing fails, create a structured response from the text
-      const content = metadataData.choices[0].message.content;
+      // fallback metadata if GPT doesn't return valid JSON
       metadata = {
         name: "Generated Village",
-        description: content,
-        attributes: {
-          population: Math.floor(Math.random() * 1000) + 100,
-          climate: "Temperate",
-          terrain: "Mixed",
-          culture: "Diverse",
-          resources: ["Agriculture", "Crafts", "Trade"],
-        },
-        features: ["Town Square", "Market", "Houses"],
-        atmosphere: "Welcoming and peaceful",
-        size: "Medium",
+        description: villageDescription,
+        image: `ipfs://${ipfsHash}`,
+        attributes: [
+          { trait_type: "Background", value: "Fantasy" },
+          { trait_type: "Rarity", value: "Unique" },
+        ],
       };
     }
 
     return NextResponse.json({
       success: true,
-      imageUrl,
       metadata,
+      imageUrl: `https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
+      pinataHash: ipfsHash,
     });
   } catch (error) {
-    console.error("Error generating village:", error);
+    console.error("Error generating village NFT:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
