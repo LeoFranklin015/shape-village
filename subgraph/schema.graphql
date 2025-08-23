@@ -1,11 +1,52 @@
-type VillageCreated @entity(immutable: true) {
+type Village @entity(immutable: false) {
+  # Primary key: the Village contract address
   id: Bytes!
-  villageId: BigInt! # uint256
-  creator: Bytes! # address
-  villageAddress: Bytes! # address
-  metadataURI: String! # string
-  timestamp: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+
+  # From VillageFactory.VillageCreated (optional if you don’t index the factory)
+  villageId: BigInt
+
+  # Creator from VillageFactory.VillageCreated
+  creator: Bytes
+
+  # Current owner of the Village (from Ownable on construction and VillageOwnershipTransferred)
+  owner: Bytes!
+
+  # Off-chain metadata URI exposed by Village.metadataURI
+  metadataURI: String!
+
+  # Timestamps
+  createdAt: BigInt! # from VillageFactory.VillageCreated.timestamp
+  updatedAt: BigInt! # bump on metadata/ownership updates and character additions
+  # Aggregate stats
+  charactersCount: BigInt! # increment on CharacterAdded
+  # Reverse lookup into Character
+  characters: [Character!]! @derivedFrom(field: "village")
+}
+
+type Character @entity(immutable: false) {
+  # Primary key: the Character ERC721 contract address
+  id: Bytes!
+
+  # Also store explicitly for clarity (same as id)
+  characterAddress: Bytes!
+
+  # Sequential id within the Village (from CharacterAdded.characterId)
+  characterId: BigInt!
+
+  # ERC721 metadata-like fields (from CharacterAdded)
+  name: String!
+  symbol: String!
+  charMetadata: String!
+
+  # Parentage (as raw addresses)
+  parents: [Bytes!]!
+
+  # Belongs-to relationship
+  village: Village!
+
+  # Ownership tracking
+  currentOwner: Bytes! # set to Village.owner at creation; update on CharacterSold.to
+  lastSoldAt: BigInt # from CharacterSold.timestamp
+  # Lifecycle
+  createdAt: BigInt! # from CharacterAdded.timestamp
 }

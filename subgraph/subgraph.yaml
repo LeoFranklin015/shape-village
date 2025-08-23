@@ -6,7 +6,7 @@ schema:
 dataSources:
   - kind: ethereum
     name: VillageFactory
-    network: base-sepolia
+    network: shape-sepolia
     source:
       address: "0x32092fbff7F4696627321bb3B747A90A89Be0210"
       abi: VillageFactory
@@ -16,7 +16,8 @@ dataSources:
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - VillageCreated
+        - Village
+        - Character
       abis:
         - name: VillageFactory
           file: ./abis/VillageFactory.json
@@ -24,3 +25,35 @@ dataSources:
         - event: VillageCreated(indexed uint256,indexed address,indexed address,string,uint256)
           handler: handleVillageCreated
       file: ./src/village-factory.ts
+templates:
+  - kind: ethereum
+    name: Village
+    network: shape-sepolia
+    source:
+      abi: Village
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Village
+        - Character
+      abis:
+        - name: Village
+          file: ./abis/Village.json
+      eventHandlers:
+        - event: CharacterAdded(indexed uint256,indexed address,string,string,string,indexed address,address[],uint256)
+          handler: handleCharacterAdded
+
+        - event: CharacterSold(indexed uint256,indexed address,indexed address,address,uint256)
+          handler: handleCharacterSold
+
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+
+        - event: VillageMetadataUpdated(indexed address,string,string,indexed address,uint256)
+          handler: handleVillageMetadataUpdated
+
+        - event: VillageOwnershipTransferred(indexed address,indexed address,indexed address,uint256)
+          handler: handleVillageOwnershipTransferred
+      file: ./src/village.ts

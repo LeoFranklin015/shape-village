@@ -1,19 +1,22 @@
-import { VillageCreated as VillageCreatedEvent } from "../generated/VillageFactory/VillageFactory"
-import { VillageCreated } from "../generated/schema"
+import { VillageCreated as VillageCreatedEvent } from "../generated/VillageFactory/VillageFactory";
+import { Village } from "../generated/schema";
+import { BigInt } from "@graphprotocol/graph-ts";
+import { Village as VillageTemplate } from "../generated/templates";
 
 export function handleVillageCreated(event: VillageCreatedEvent): void {
-  let entity = new VillageCreated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.villageId = event.params.villageId
-  entity.creator = event.params.creator
-  entity.villageAddress = event.params.villageAddress
-  entity.metadataURI = event.params.metadataURI
-  entity.timestamp = event.params.timestamp
+  const villageAddr = event.params.villageAddress;
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  // Use the village contract address as the stable entity ID
+  let village = new Village(villageAddr);
+  village.villageId = event.params.villageId; // BigInt
+  village.creator = event.params.creator; // Bytes
+  village.owner = event.params.creator; // initial owner == creator
+  village.metadataURI = event.params.metadataURI; // String
+  village.createdAt = event.params.timestamp; // BigInt
+  village.updatedAt = event.params.timestamp; // BigInt
+  village.charactersCount = BigInt.zero(); // start at 0
 
-  entity.save()
+  village.save();
+
+  VillageTemplate.create(villageAddr);
 }
