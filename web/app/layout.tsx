@@ -2,6 +2,7 @@ import type React from "react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
+import Provider from "@/components/Provider";
 
 export const metadata: Metadata = {
   title: "RETRO WANDER",
@@ -35,9 +36,11 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <main className="flex min-h-screen flex-col items-center justify-center">
-            {children}
-          </main>
+          <Provider>
+            <main className="flex min-h-screen flex-col items-center justify-center">
+              {children}
+            </main>
+          </Provider>
         </ThemeProvider>
       </body>
     </html>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useVillageGeneration } from "@/hooks/use-village-generation";
 import { VillageMetadata } from "@/lib/types";
+import { CustomConnectButton } from "@/components/ConnectButton";
 
 export default function VillagePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,7 +58,7 @@ export default function VillagePage() {
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-[#B9EAFD] to-[#F3FAFF]">
       {/* Header */}
-      <div className="bg-black/10 backdrop-blur-sm p-2">
+      <div className="bg-black/10 backdrop-blur-sm p-2 rounded-full max-w-6xl mx-auto mt-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Left side - Village title */}
@@ -69,13 +70,7 @@ export default function VillagePage() {
 
             {/* Right side - Create Village button */}
             <div className="flex items-center">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-white text-[#001428] px-6 py-3 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 shadow-lg"
-              >
-                <span className="text-lg">+</span>
-                Create Village
-              </button>
+              <CustomConnectButton />
             </div>
           </div>
         </div>
@@ -84,6 +79,20 @@ export default function VillagePage() {
       {/* Main content area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Content will go here */}
+        <div className="flex justify-between">
+          <div className="flex items-center">
+            <h1 className="game-text text-lg font-bold text-[#5CA4A3]">
+              Village Center
+            </h1>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-white text-[#001428] px-6 py-3 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 shadow-lg"
+          >
+            <span className="text-lg">+</span>
+            Create Village
+          </button>
+        </div>
       </div>
 
       {/* Create Village Modal */}
