@@ -2,39 +2,121 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useVillageGeneration } from "@/hooks/use-village-generation";
-import { VillageMetadata } from "@/lib/types";
-import { CustomConnectButton } from "@/components/ConnectButton";
+import Navbar from "@/components/Navbar";
+import { client, walletClient } from "@/lib/client";
+import {
+  VILLAGE_FACTORY_ABI,
+  VILLAGE_FACTORY_CONTRACT_ADDRESS,
+} from "@/lib/const";
+import { useAccount } from "wagmi";
 
 export default function VillagePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [villageDescription, setVillageDescription] = useState("");
   const [showHammer, setShowHammer] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedVillage, setGeneratedVillage] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { address } = useAccount();
 
-  const { generateVillage, isGenerating, generatedVillage, error, reset } =
-    useVillageGeneration();
+  const generateVillage = async (description: string) => {
+    if (!description.trim()) {
+      setError("Please provide a village description");
+      return null;
+    }
+
+    setIsGenerating(true);
+    setError(null);
+    setGeneratedVillage(null);
+
+    try {
+      const response = await fetch("/api/generate-village", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ villageDescription: description }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate village");
+      }
+
+      setGeneratedVillage(data);
+      return data;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred";
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const reset = () => {
+    setGeneratedVillage(null);
+    setError(null);
+    setIsGenerating(false);
+  };
 
   const handleCreateVillage = async () => {
-    if (!villageDescription.trim()) {
+    if (!villageDescription.trim() || !address) {
       return;
     }
     setShowHammer(true);
 
-    const result = await generateVillage(villageDescription);
-    if (result) {
-      // Merge image URL into metadata and print complete data
-      const completeVillageData = {
-        ...result.metadata,
-        imageUrl: result.imageUrl,
-      };
+    // const result = await generateVillage(villageDescription);
+    // if (result) {
+    //   // Merge image URL into metadata and print complete data
+    //   const completeVillageData = {
+    //     ...result.metadata,
+    //     imageUrl: result.imageUrl,
+    //   };
 
-      console.log("Complete Village Data:", completeVillageData);
+    //   console.log("Complete Village Data:", completeVillageData);
 
-      setShowResults(true);
-      setIsModalOpen(false);
-      setShowHammer(false);
-    }
+    const completeVillageData = {
+      name: "Green Haven",
+      description:
+        "A serene, lush-green village with no houses in the centre but two well-maintained farmhouses situated in the corners.",
+      attributes: {
+        types: ["Rural"],
+        culture: "Agrarian",
+        resources: ["Vegetation", "Farmland"],
+      },
+      features: ["No central housing", "Two corner farmhouses"],
+      imageUrl:
+        "https://oaidalleapiprodscus.blob.core.windows.net/private/org-eNwqmSK4VURnx7crJShpR70R/user-7R6bXQRnfeUIT8AHHsmX6jlI/img-4Ju9efuqSW48sLJO5vBAZ9ce.png?st=2025-08-23T17%3A42%3A33Z&se=2025-08-23T19%3A42%3A33Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=8b33a531-2df9-46a3-bc02-d4b1430a422c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-23T18%3A42%3A33Z&ske=2025-08-24T18%3A42%3A33Z&sks=b&skv=2024-08-04&sig=Osovug5DeXMN5V/YwvAfJ6pgkjCDbho8LLpWlrTXE08%3D",
+    };
+
+    const tx = await walletClient?.writeContract({
+      address: VILLAGE_FACTORY_CONTRACT_ADDRESS as `0x${string}`,
+      abi: VILLAGE_FACTORY_ABI,
+      functionName: "createVillage",
+      args: [JSON.stringify(completeVillageData)],
+      account: address as `0x${string}`,
+    });
+
+    await client.waitForTransactionReceipt({ hash: tx as `0x${string}` });
+    setShowResults(true);
+    setIsModalOpen(false);
+    setShowHammer(false);
+
+    // Auto-close the results modal after 3 seconds
+    setTimeout(() => {
+      setShowResults(false);
+      reset();
+      setVillageDescription("");
+    }, 3000);
+  };
+
+  const clearError = () => {
+    // Reset the error state from the hook
+    reset();
   };
 
   const handleCloseResults = () => {
@@ -43,39 +125,10 @@ export default function VillagePage() {
     setVillageDescription("");
   };
 
-  const handleNewVillage = () => {
-    setShowResults(false);
-    reset();
-    setVillageDescription("");
-    setIsModalOpen(true);
-  };
-
-  const clearError = () => {
-    // Reset the error state from the hook
-    reset();
-  };
-
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-[#B9EAFD] to-[#F3FAFF]">
       {/* Header */}
-      <div className="bg-black/10 backdrop-blur-sm p-2 rounded-full max-w-6xl mx-auto mt-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Left side - Village title */}
-            <div className="flex items-center">
-              <h1 className="game-text text-xl font-bold text-white">
-                ShapeVillage
-              </h1>
-            </div>
-
-            {/* Right side - Create Village button */}
-            <div className="flex items-center">
-              <CustomConnectButton />
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <Navbar />
       {/* Main content area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Content will go here */}
@@ -204,11 +257,11 @@ export default function VillagePage() {
 
             {/* Modal Body */}
             <div className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="flex justify-center">
                 {/* Generated Image */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Generated Image
+                <div className="space-y-4 max-w-2xl">
+                  <h3 className="text-lg font-semibold text-gray-900 text-center">
+                    Your Village Has Been Created!
                   </h3>
                   <div className="relative aspect-video rounded-lg overflow-hidden border border-gray-200">
                     <Image
@@ -219,34 +272,23 @@ export default function VillagePage() {
                       priority
                     />
                   </div>
-                </div>
-
-                {/* Village Metadata as JSON */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Village Metadata (JSON)
-                  </h3>
-                  <div className="bg-gray-100 p-4 rounded-lg border border-gray-200">
-                    <pre className="text-sm text-gray-800 overflow-auto max-h-96">
-                      {JSON.stringify(generatedVillage.metadata, null, 2)}
-                    </pre>
-                  </div>
+                  <p className="text-center text-gray-600">
+                    Your village "{generatedVillage.metadata.name}" has been
+                    successfully created and deployed to the blockchain!
+                  </p>
                 </div>
               </div>
 
               {/* Modal Footer */}
-              <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+              <div className="flex flex-col items-center gap-3 mt-6 pt-6 border-t border-gray-200">
+                <p className="text-sm text-gray-500 text-center">
+                  This modal will automatically close in a few seconds...
+                </p>
                 <button
                   onClick={handleCloseResults}
                   className="px-6 py-3 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium"
                 >
-                  Close
-                </button>
-                <button
-                  onClick={handleNewVillage}
-                  className="px-6 py-3 bg-[#5CA4A3] text-white rounded-lg hover:bg-[#5CA4A3]/90 transition-all duration-200 font-medium shadow-md"
-                >
-                  Create Another Village
+                  Close Now
                 </button>
               </div>
             </div>

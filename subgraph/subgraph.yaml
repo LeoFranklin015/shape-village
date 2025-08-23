@@ -8,9 +8,9 @@ dataSources:
     name: VillageFactory
     network: shape-sepolia
     source:
-      address: "0x57223AABb448F552Bd69cd48e4bCA980aDa9EAaB"
+      address: "0xDb487D11Ea86Fa1722313721AD4423dcfEfcFD78"
       abi: VillageFactory
-      startBlock: 18508625
+      startBlock: 18518501
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9

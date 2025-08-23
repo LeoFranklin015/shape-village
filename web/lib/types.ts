@@ -24,3 +24,4 @@ export interface VillageGenerationResponse {
 export interface VillageGenerationError {
   error: string;
 }
+
