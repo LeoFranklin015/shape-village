@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { client, walletClient } from "@/lib/client";
@@ -9,6 +9,8 @@ import {
   VILLAGE_FACTORY_CONTRACT_ADDRESS,
 } from "@/lib/const";
 import { useAccount } from "wagmi";
+import { fetchSubgraphMeta } from "@/lib/getVillages";
+import { useRouter } from "next/navigation";
 
 export default function VillagePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,7 +20,10 @@ export default function VillagePage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedVillage, setGeneratedVillage] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [villages, setVillages] = useState<any[]>([]);
+  const [isLoadingVillages, setIsLoadingVillages] = useState(false);
   const { address } = useAccount();
+  const router = useRouter();
 
   const generateVillage = async (description: string) => {
     if (!description.trim()) {
@@ -61,6 +66,22 @@ export default function VillagePage() {
     setGeneratedVillage(null);
     setError(null);
     setIsGenerating(false);
+  };
+
+  const refreshVillages = async () => {
+    if (address) {
+      setIsLoadingVillages(true);
+      try {
+        const villages = await fetchSubgraphMeta(address);
+        console.log("Refreshed villages:", villages);
+        setVillages(villages);
+      } catch (error) {
+        console.error("Error fetching villages:", error);
+        setError("Failed to fetch villages");
+      } finally {
+        setIsLoadingVillages(false);
+      }
+    }
   };
 
   const handleCreateVillage = async () => {
@@ -111,6 +132,7 @@ export default function VillagePage() {
       setShowResults(false);
       reset();
       setVillageDescription("");
+      refreshVillages(); // Refresh villages after successful creation
     }, 3000);
   };
 
@@ -125,27 +147,142 @@ export default function VillagePage() {
     setVillageDescription("");
   };
 
+  useEffect(() => {
+    const fetchVillages = async () => {
+      if (address) {
+        setIsLoadingVillages(true);
+        try {
+          const villages = await fetchSubgraphMeta(address);
+          console.log(villages);
+          setVillages(villages);
+        } catch (error) {
+          console.error("Error fetching villages:", error);
+          setError("Failed to fetch villages");
+        } finally {
+          setIsLoadingVillages(false);
+        }
+      }
+    };
+    fetchVillages();
+  }, [address]);
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-[#B9EAFD] to-[#F3FAFF]">
       {/* Header */}
       <Navbar />
       {/* Main content area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Content will go here */}
-        <div className="flex justify-between">
+        {/* Header section */}
+        <div className="flex justify-between items-center mb-8">
           <div className="flex items-center">
-            <h1 className="game-text text-lg font-bold text-[#5CA4A3]">
+            <h1 className="game-text text-2xl font-bold text-[#5CA4A3]">
               Village Center
             </h1>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-white text-[#001428] px-6 py-3 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 shadow-lg"
-          >
-            <span className="text-lg">+</span>
-            Create Village
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-white text-[#001428] px-6 py-3 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2 shadow-lg"
+            >
+              <span className="text-lg">+</span>
+              Create Village
+            </button>
+          </div>
         </div>
+
+        {/* Villages Grid */}
+        {isLoadingVillages ? (
+          <div className="text-center py-16">
+            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-3xl text-gray-400">⚙️</span>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Loading villages...
+            </h3>
+            <p className="text-gray-500 mb-6">
+              Please wait while we fetch the latest village data.
+            </p>
+          </div>
+        ) : villages.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {villages.map((village) => {
+              try {
+                const metadata = JSON.parse(village.metadataURI);
+                return (
+                  <div
+                    key={village.id}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
+                    onClick={() => {
+                      router.push(`/village/${village.id}`);
+                    }}
+                  >
+                    {/* Village Image */}
+                    <div className="relative h-48 w-full">
+                      <Image
+                        src={metadata.imageUrl}
+                        alt={metadata.name}
+                        fill
+                        className="object-cover"
+                        priority
+                      />
+                      <div className="absolute top-3 right-3">
+                        <div className="bg-[#5CA4A3] text-white text-xs px-2 py-1 rounded-full font-medium">
+                          #{village.villageId}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Village Content */}
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 game-text">
+                        {metadata.name}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                        {metadata.description}
+                      </p>
+
+                      {/* Stats */}
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex justify-between text-sm text-gray-500">
+                          <span>Characters: {village.charactersCount}</span>
+                          <span>
+                            Created:{" "}
+                            {new Date(
+                              parseInt(village.createdAt) * 1000
+                            ).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              } catch (error) {
+                console.error("Error parsing village metadata:", error);
+                return null;
+              }
+            })}
+          </div>
+        ) : (
+          /* Empty State */
+          <div className="text-center py-16">
+            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-3xl text-gray-400">🏘️</span>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No villages yet
+            </h3>
+            <p className="text-gray-500 mb-6">
+              Create your first village to get started on your blockchain
+              adventure!
+            </p>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-[#5CA4A3] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#5CA4A3]/90 transition-colors duration-200"
+            >
+              Create Your First Village
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Create Village Modal */}
@@ -276,6 +413,12 @@ export default function VillagePage() {
                     Your village "{generatedVillage.metadata.name}" has been
                     successfully created and deployed to the blockchain!
                   </p>
+                  <div className="text-center">
+                    <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
+                      <span>✅</span>
+                      Transaction Confirmed
+                    </div>
+                  </div>
                 </div>
               </div>
 
