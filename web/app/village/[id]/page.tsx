@@ -6,6 +6,7 @@ import { fetchVillageData } from "@/lib/getVillageData";
 import Image from "next/image";
 import { client, walletClient } from "@/lib/client";
 import { VILLAGE_ABI } from "@/lib/const";
+import VillageCharacter from "@/components/VillageCharacter";
 
 const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params);
@@ -18,6 +19,8 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [characterDescription, setCharacterDescription] = useState("");
   const [isCreatingCharacter, setIsCreatingCharacter] = useState(false);
   const [showHammer, setShowHammer] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
+  const [characterPositions, setCharacterPositions] = useState<any[]>([]);
 
   const fetchVillageDetails = async () => {
     if (!id) return;
@@ -40,6 +43,56 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   useEffect(() => {
     fetchVillageDetails();
   }, [id]);
+
+  // Animation effect for character positions
+  useEffect(() => {
+    if (!villageData?.characters || villageData.characters.length < 2) return;
+
+    // Initialize character positions
+    const initialPositions = villageData.characters.map(
+      (character: any, index: number) => ({
+        id: character.id,
+        x: 50 + ((index * 120) % 400),
+        y: 50 + Math.floor((index * 120) / 400) * 120,
+        direction: Math.random() > 0.5 ? 1 : -1,
+        speed: 0.5 + Math.random() * 1,
+      })
+    );
+
+    setCharacterPositions(initialPositions);
+
+    // Animation loop
+    const animationInterval = setInterval(() => {
+      setCharacterPositions((prev) =>
+        prev.map((pos) => {
+          let newX = pos.x + pos.speed * pos.direction;
+          let newY = pos.y;
+
+          // Bounce off boundaries
+          if (newX <= 30 || newX >= 370) {
+            pos.direction *= -1;
+            newX = Math.max(30, Math.min(370, newX));
+          }
+
+          // Add some vertical movement
+          if (Math.random() < 0.02) {
+            newY = Math.max(
+              30,
+              Math.min(170, pos.y + (Math.random() - 0.5) * 20)
+            );
+          }
+
+          return {
+            ...pos,
+            x: newX,
+            y: newY,
+          };
+        })
+      );
+    }, 100);
+
+    return () => clearInterval(animationInterval);
+  }, [villageData?.characters]);
 
   const handleCreateCharacter = async () => {
     if (!characterName.trim() || !characterDescription.trim() || !address) {
@@ -164,14 +217,6 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
       {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Village Header */}
-        <div className="mb-8">
-          <h1 className="game-text text-3xl font-bold text-[#5CA4A3] mb-2">
-            Village Details
-          </h1>
-          <p className="text-gray-600">Village ID: {id}</p>
-        </div>
-
         {villageData ? (
           <div className="space-y-6">
             {parseInt(villageData.charactersCount) == 1 && (
@@ -233,6 +278,187 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
                 >
                   Create Character
                 </button>
+              </div>
+            )}
+
+            {/* Wander Component - Shows when 2+ characters */}
+            {parseInt(villageData.charactersCount) >= 2 && (
+              <div className="bg-white rounded-xl shadow-lg">
+                <div className="flex h-[80vh]">
+                  {/* Wander Area - 75% width */}
+                  <div className="w-3/4 relative overflow-hidden">
+                    {/* Village Background Image */}
+                    <div className="absolute inset-0">
+                      {(() => {
+                        try {
+                          const villageMetadata = JSON.parse(
+                            villageData.metadataURI
+                          );
+                          return (
+                            <Image
+                              src={"/Village.png"}
+                              alt="Village Background"
+                              fill
+                              className="object-cover"
+                              priority
+                            />
+                          );
+                        } catch (error) {
+                          return (
+                            <div className="w-full h-full bg-gradient-to-br from-green-50 to-blue-50"></div>
+                          );
+                        }
+                      })()}
+                      {/* Overlay for better character visibility */}
+                      <div className="absolute inset-0 bg-black/20"></div>
+                    </div>
+
+                    {/* Characters */}
+                    {villageData.characters.map(
+                      (character: any, index: number) => {
+                        try {
+                          const charMetadata = JSON.parse(
+                            character.charMetadata
+                          );
+                          const position = characterPositions.find(
+                            (pos) => pos.id === character.id
+                          );
+
+                          if (!position) return null;
+
+                          return (
+                            <VillageCharacter
+                              key={character.id}
+                              character={character}
+                              position={position}
+                              isSelected={
+                                selectedCharacter?.id === character.id
+                              }
+                              onClick={() => setSelectedCharacter(character)}
+                            />
+                          );
+                        } catch (error) {
+                          return null;
+                        }
+                      }
+                    )}
+                  </div>
+
+                  {/* Character Details Panel - 25% width */}
+                  <div className="w-1/4 border-l border-gray-200 p-4 bg-gray-50">
+                    {selectedCharacter ? (
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-gray-900 text-center">
+                          Character Details
+                        </h3>
+
+                        {/* Character Image */}
+                        <div className="flex justify-center">
+                          <div className="relative w-20 h-20">
+                            {(() => {
+                              try {
+                                // Use the same sprite assignment logic as the wander component
+                                const characterId = selectedCharacter.id;
+                                const spriteNumber =
+                                  parseInt(characterId.slice(-1), 16) % 2;
+                                const spriteSrc =
+                                  spriteNumber === 0 ? "/1.png" : "/2.png";
+
+                                return (
+                                  <Image
+                                    src={spriteSrc}
+                                    alt={selectedCharacter.name}
+                                    width={80}
+                                    height={80}
+                                    className="rounded-full border-2 border-[#5CA4A3] object-cover"
+                                    priority
+                                  />
+                                );
+                              } catch (error) {
+                                return (
+                                  <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <span className="text-gray-500 text-sm">
+                                      ?
+                                    </span>
+                                  </div>
+                                );
+                              }
+                            })()}
+                          </div>
+                        </div>
+
+                        {/* Character Info */}
+                        <div className="text-center">
+                          <h4 className="font-bold text-gray-900 text-lg">
+                            {selectedCharacter.name}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {(() => {
+                              try {
+                                const charMetadata = JSON.parse(
+                                  selectedCharacter.charMetadata
+                                );
+                                return charMetadata.description;
+                              } catch (error) {
+                                return "Description not available";
+                              }
+                            })()}
+                          </p>
+                        </div>
+
+                        {/* Character Attributes */}
+                        {(() => {
+                          try {
+                            const charMetadata = JSON.parse(
+                              selectedCharacter.charMetadata
+                            );
+                            if (
+                              charMetadata.attributes &&
+                              charMetadata.attributes.length > 0
+                            ) {
+                              return (
+                                <div className="space-y-2">
+                                  <h5 className="text-sm font-medium text-gray-700">
+                                    Attributes
+                                  </h5>
+                                  <div className="space-y-1">
+                                    {charMetadata.attributes.map(
+                                      (attr: any, index: number) => (
+                                        <div
+                                          key={index}
+                                          className="flex justify-between text-xs"
+                                        >
+                                          <span className="text-gray-600">
+                                            {attr.trait_type}:
+                                          </span>
+                                          <span className="text-gray-900 font-medium">
+                                            {attr.value}
+                                          </span>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          } catch (error) {
+                            return null;
+                          }
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="text-center text-gray-500 py-8">
+                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <span className="text-gray-400">👤</span>
+                        </div>
+                        <p className="text-sm">
+                          Click on a character to view details
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>
