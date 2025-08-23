@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export default function IntroScreen() {
   const router = useRouter();
-  const [showStart, setShowStart] = useState(true);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -19,12 +18,16 @@ export default function IntroScreen() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [router]);
 
+  const handleGetStarted = () => {
+    router.push(`/wander`);
+  };
+
   return (
-    <div className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
-      {/* New background with Berlin skyline and RETRO WANDER title */}
+    <div className="w-full h-screen flex overflow-hidden">
+      {/* Background with Berlin skyline */}
       <div className="absolute inset-0 z-0 bg-[#001428] pixelated">
         <Image
-          src="/Bg.gif"
+          src="/hero.gif"
           alt="Berlin Skyline"
           fill
           className="object-cover pixelated"
@@ -32,13 +35,21 @@ export default function IntroScreen() {
         />
       </div>
 
-      <div className="z-10 flex flex-col items-center justify-center w-full">
-        <div
-          className={`game-text text-white text-2xl text-center w-full ${
-            showStart ? "blink" : ""
-          }`}
-        >
-          Press ENTER to Start
+      {/* Left side content */}
+      <div className="z-10 flex-1 flex flex-col justify-end items-start p-10">
+        <div className="max-w-md">
+          <h1 className="game-text text-6xl font-bold text-white mb-4 leading-tight">
+            ShapeVillage
+          </h1>
+          <p className="game-text text-md text-gray-300 mb-8 leading-relaxed">
+            Start a village, watch life unfold.
+          </p>
+          <button
+            onClick={handleGetStarted}
+            className="px-8 py-4 bg-white text-[#001428] font-semibold text-lg rounded-full hover:bg-gray-100 transition-colors duration-200 shadow-lg"
+          >
+            Get Started
+          </button>
         </div>
       </div>
     </div>
