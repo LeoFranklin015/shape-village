@@ -9,14 +9,32 @@ contract VillageFactory  {
     uint256 public nextVillageId;
     mapping(uint256 => address) public villageContracts;
 
+    // Events for proper indexing and monitoring
+    event VillageCreated(
+        uint256 indexed villageId,
+        address indexed creator,
+        address indexed villageAddress,
+        string metadataURI,
+        uint256 timestamp
+    );
 
     function createVillage(string memory metadataURI) external returns (address) {
         uint256 villageId = nextVillageId++;
 
         Village village = new Village(metadataURI, msg.sender);
-        villageContracts[villageId] = address(village);
+        address villageAddress = address(village);
+        villageContracts[villageId] = villageAddress;
 
-        return address(village);
+        // Emit event for indexing
+        emit VillageCreated(
+            villageId,
+            msg.sender,
+            villageAddress,
+            metadataURI,
+            block.timestamp
+        );
+
+        return villageAddress;
     }
 
     function getVillageAddress(uint256 villageId) external view returns (address) {

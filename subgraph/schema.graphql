@@ -1,0 +1,11 @@
+type VillageCreated @entity(immutable: true) {
+  id: Bytes!
+  villageId: BigInt! # uint256
+  creator: Bytes! # address
+  villageAddress: Bytes! # address
+  metadataURI: String! # string
+  timestamp: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

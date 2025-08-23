@@ -12,6 +12,14 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       gasPrice: "auto",
     },
+    sepolia: {
+      url:
+        process.env.SEPOLIA_RPC_URL ||
+        "https://base-sepolia.g.alchemy.com/v2/jeI1pU88-tCLQA_fkkFmV",
+      chainId: 84532,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      gasPrice: "auto",
+    },
   },
   etherscan: {
     apiKey: {

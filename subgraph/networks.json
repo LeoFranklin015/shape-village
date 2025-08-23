@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "VillageFactory": {
+      "address": "0x32092fbff7F4696627321bb3B747A90A89Be0210",
+      "startBlock": 30089395
+    }
+  }
+}
