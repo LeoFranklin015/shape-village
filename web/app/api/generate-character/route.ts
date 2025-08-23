@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { characterDescription } = await request.json();
+    const { characterDescription, name } = await request.json();
 
     if (!characterDescription) {
       return NextResponse.json(
@@ -32,11 +32,13 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           model: "dall-e-3",
           prompt: `Create a detailed, NFT-style avatar of a unique character. 
-                   Make it vibrant, collectible, and visually distinct like a PFP NFT.
+                   Make it like a PFP NFT. Dont add too artificial colors and images
+                   Keep it simple , Keep it in 8bits style . PFP of a character.
+                   The NFT must Only contain the Object , No other details to be written or shown
                    Description: ${characterDescription}`,
           n: 1,
           size: "1024x1024",
-          quality: "high",
+          quality: "standard",
         }),
       }
     );
@@ -67,8 +69,7 @@ export async function POST(request: NextRequest) {
           messages: [
             {
               role: "system",
-              content:
-                "You are a creative NFT metadata generator. Generate ERC721-compliant metadata for a character NFT. Return JSON with this structure: { name: string, description: string, image: string, attributes: [{ trait_type: string, value: string }] }",
+              content: `You are a creative NFT metadata generator. Generate ERC721-compliant metadata for a character NFT. Return JSON with this structure: { name: ${name}, description: string, image: string, attributes: [{ trait_type: string, value: string }] }`,
             },
             {
               role: "user",
