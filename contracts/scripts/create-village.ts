@@ -18,7 +18,7 @@ async function main() {
   // --- Config ---
   const VILLAGE_FACTORY_ADDRESS =
     process.env.VILLAGE_FACTORY_ADDRESS ||
-    "0xde36EF62bB97DA6B7Ef1173355288362BcD52DD2";
+    "0x57223AABb448F552Bd69cd48e4bCA980aDa9EAaB";
 
   const METADATA_URI =
     process.env.METADATA_URI || "ipfs://QmYourMetadataHashHere";

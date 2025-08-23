@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: VillageFactory
-    network: base-sepolia
+    network: shape-sepolia
     source:
-      address: "0xde36EF62bB97DA6B7Ef1173355288362BcD52DD2"
+      address: "0x57223AABb448F552Bd69cd48e4bCA980aDa9EAaB"
       abi: VillageFactory
-      startBlock: 30092352
+      startBlock: 18508625
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -28,7 +28,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: Village
-    network: base-sepolia
+    network: shape-sepolia
     source:
       abi: Village
     mapping:
