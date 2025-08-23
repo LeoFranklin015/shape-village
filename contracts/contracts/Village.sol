@@ -2,9 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "./Character.sol";
 
-contract Village is Ownable {
+contract Village is Ownable,ERC721Holder {
     string public metadataURI;
     uint256 public nextCharacterId;
     mapping(uint256 => address) public characters;
@@ -76,7 +77,8 @@ contract Village is Ownable {
         address characterAddress = characters[charId];
         address from = owner();
         
-        Character(characterAddress).transferOwnership(to);
+        // Transfer the ERC721 token instead of ownership
+        Character(characterAddress).transferFrom(from, to, 1);
         
         // Emit event for indexing
         emit CharacterSold(

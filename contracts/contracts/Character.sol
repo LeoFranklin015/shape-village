@@ -2,18 +2,16 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Character is ERC721, Ownable {
+contract Character is ERC721 {
     uint256 public tokenId;
     string private metadataURI;
     address[] private parents;
     
-    constructor(string memory _name, string memory _symbol, string memory _metadataURI, address village, address[] memory _parents) ERC721(_name, _symbol) Ownable(msg.sender) {
+    constructor(string memory _name, string memory _symbol, string memory _metadataURI, address village, address[] memory _parents) ERC721(_name, _symbol) {
         tokenId = 1;
         _safeMint(village, tokenId); // Initially owned by Village
         metadataURI = _metadataURI;
-        _transferOwnership(village);
         parents = _parents;
     }
 

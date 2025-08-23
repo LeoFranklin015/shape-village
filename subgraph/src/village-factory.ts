@@ -14,7 +14,7 @@ export function handleVillageCreated(event: VillageCreatedEvent): void {
   village.metadataURI = event.params.metadataURI; // String
   village.createdAt = event.params.timestamp; // BigInt
   village.updatedAt = event.params.timestamp; // BigInt
-  village.charactersCount = BigInt.zero(); // start at 0
+  village.charactersCount = BigInt.fromI32(0); // start at 0
 
   village.save();
 
