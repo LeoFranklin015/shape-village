@@ -10,7 +10,7 @@ export default function IntroScreen() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        router.push(`/wander`);
+        router.push(`/village`);
       }
     };
 
@@ -19,7 +19,7 @@ export default function IntroScreen() {
   }, [router]);
 
   const handleGetStarted = () => {
-    router.push(`/wander`);
+    router.push(`/village`);
   };
 
   return (
@@ -38,7 +38,7 @@ export default function IntroScreen() {
       {/* Left side content */}
       <div className="z-10 flex-1 flex flex-col justify-end items-start p-10">
         <div className="max-w-md">
-          <h1 className="game-text text-6xl font-bold text-white mb-4 leading-tight">
+          <h1 className="game-text text-5xl font-bold text-white mb-4 leading-tight">
             ShapeVillage
           </h1>
           <p className="game-text text-md text-gray-300 mb-8 leading-relaxed">

@@ -1,7 +1,7 @@
-import type React from "react"
-import "./globals.css"
-import type { Metadata } from "next"
-import { ThemeProvider } from "@/components/theme-provider"
+import type React from "react";
+import "./globals.css";
+import type { Metadata } from "next";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "RETRO WANDER",
@@ -12,25 +12,34 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/favicon.ico",
   },
-    generator: 'v0.app'
-}
+  generator: "v0.app",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+          rel="stylesheet"
+        />
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className="bg-black min-h-screen">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          <main className="flex min-h-screen flex-col items-center justify-center">{children}</main>
+        <ThemeProvider
+          attribute="class"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <main className="flex min-h-screen flex-col items-center justify-center">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
