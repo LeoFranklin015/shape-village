@@ -20,7 +20,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "openai": "^5.15.0"
+    "openai": "^5.15.0",
+    "pinata": "^2.5.0",
+    "viem": "^2.34.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

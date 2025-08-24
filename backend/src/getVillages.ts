@@ -38,10 +38,12 @@ export async function fetchSubgraphData() {
     }
 
     const result: any = await response.json();
-    console.log(result.data.villages);
+    console.log(result.data.villages[0].characters);
     return result.data.villages;
   } catch (error) {
     console.error("Error fetching subgraph meta:", error);
     throw error;
   }
 }
+
+fetchSubgraphData();

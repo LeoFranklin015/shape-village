@@ -1,6 +1,20 @@
 import { fetchSubgraphData } from "./getVillages";
-import dotenv from "dotenv";
+// @ts-ignore - Pinata module import
+import { PinataSDK } from "pinata";
+
+import { VILLAGE_ABI } from "./abi";
 dotenv.config();
+import {
+  createPublicClient,
+  createWalletClient,
+  http,
+  type WalletClient,
+} from "viem";
+
+import { shapeSepolia } from "viem/chains";
+import dotenv from "dotenv";
+import { privateKeyToAccount } from "viem/accounts";
+import { client } from "./client";
 
 interface Character {
   id: string;
@@ -20,6 +34,114 @@ interface Village {
   charactersCount: string;
   characters: Character[];
 }
+
+interface OpenAIImageResponse {
+  data: Array<{
+    url: string;
+  }>;
+}
+
+const generateChildImage = async (
+  childDescription: string,
+  childName: string
+) => {
+  try {
+    // Check if OpenAI API key is configured
+    const openaiApiKey = process.env["OPENAI_API_KEY"];
+    if (!openaiApiKey) {
+      throw new Error("OpenAI API key not configured");
+    }
+
+    // Generate NFT-style character image using DALL·E
+    const imageResponse = await fetch(
+      "https://api.openai.com/v1/images/generations",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${openaiApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "dall-e-3",
+          prompt: `Create a detailed, NFT-style avatar of a unique character. 
+
+                   Make it like a PFP NFT. Dont add too artificial colors and images
+                   Keep it simple , Keep it in 8bits style . PFP of a character.
+                   The NFT must Only contain the Object , No other details to be written or shown
+                   Description: ${childDescription}
+                   
+                   STRICTLY ONLY PFP -> only the NFT character no more workds in the image
+                   `,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+        }),
+      }
+    );
+
+    if (!imageResponse.ok) {
+      const errorData = await imageResponse.json();
+      console.error("OpenAI Image API Error:", errorData);
+      throw new Error("Failed to generate image");
+    }
+
+    const imageData = (await imageResponse.json()) as OpenAIImageResponse;
+    const openaiImageUrl = imageData.data[0]?.url;
+
+    if (!openaiImageUrl) {
+      throw new Error("No image URL received from OpenAI");
+    }
+
+    // Download the generated image
+    console.log("Downloading child image from OpenAI:", openaiImageUrl);
+    const imageDownloadResponse = await fetch(openaiImageUrl);
+
+    if (!imageDownloadResponse.ok) {
+      throw new Error("Failed to download generated image");
+    }
+
+    // Convert the image to a File object for Pinata upload
+    const imageBuffer = await imageDownloadResponse.arrayBuffer();
+    const imageBlob = new Blob([imageBuffer], { type: "image/png" });
+    const imageFile = new File(
+      [imageBlob],
+      `child-${childName}-${Date.now()}.png`,
+      {
+        type: "image/png",
+      }
+    );
+
+    // Check if Pinata JWT is configured
+    const pinataJwt = process.env["PINATA_JWT"];
+    if (!pinataJwt) {
+      throw new Error("Pinata JWT not configured");
+    }
+
+    // Initialize Pinata SDK
+    const pinata = new PinataSDK({
+      pinataJwt: pinataJwt,
+      pinataGateway:
+        process.env["GATEWAY_URL"] ||
+        "orange-select-opossum-767.mypinata.cloud",
+    });
+
+    // Upload image to Pinata
+    console.log("Uploading child image to Pinata...");
+    const pinataUpload = await pinata.upload.public.file(imageFile);
+    console.log("Pinata upload successful:", pinataUpload);
+
+    // Get the IPFS hash from the upload response
+    const ipfsHash = pinataUpload.cid;
+    if (!ipfsHash) {
+      throw new Error("Failed to get IPFS hash from Pinata upload");
+    }
+
+    return ipfsHash;
+  } catch (error) {
+    console.error("Error generating child image:", error);
+    return null;
+  }
+};
 
 const generateChildMetadata = async (
   villageDesc: String,
@@ -108,6 +230,21 @@ Create a unique child character that combines traits from both parents while bei
       };
     }
 
+    // Generate image for the child character
+    console.log("🎨 Generating child character image...");
+    const childImageHash = await generateChildImage(
+      childMetadata.description,
+      childMetadata.name
+    );
+
+    if (childImageHash) {
+      childMetadata.image = `https://gateway.pinata.cloud/ipfs/${childImageHash}`;
+      console.log(`   🖼️  Child image uploaded to IPFS: ${childImageHash}`);
+    } else {
+      console.log("   ⚠️  Failed to generate child image, using placeholder");
+      childMetadata.image = "ipfs://placeholder";
+    }
+
     return childMetadata;
   } catch (error) {
     console.error("Error generating child metadata:", error);
@@ -168,16 +305,40 @@ const discoverNewCharacters = async () => {
         );
 
         discoveredCharacters++;
-
-        // Here you would typically:
-        // 1. Deploy the child character NFT to the blockchain
-        // 2. Update the village's character count
-        // 3. Store the relationship between parents and child
-
         console.log(
           `   🔗 Child metadata:`,
           JSON.stringify(childMetadata, null, 2)
         );
+
+        // Create the character onchain.
+
+        const walletClient: WalletClient = createWalletClient({
+          chain: shapeSepolia,
+          transport: http((process.env["SHAPE_SEPOLIA_URL"] as string) || ""),
+          account: privateKeyToAccount(
+            process.env["PRIVATE_KEY"] as `0x${string}`
+          ),
+        });
+
+        const tx = await walletClient.writeContract({
+          chain: shapeSepolia,
+          account: privateKeyToAccount(
+            process.env["PRIVATE_KEY"] as `0x${string}`
+          ),
+          address: village.id as `0x${string}`,
+          abi: VILLAGE_ABI,
+          functionName: "addCharacter",
+          args: [
+            childMetadata.name,
+            childMetadata.name,
+            JSON.stringify(childMetadata),
+            [selectedPair[0].id, selectedPair[1].id],
+          ],
+        });
+
+        console.log(tx);
+
+        await client.waitForTransactionReceipt({ hash: tx });
       } else {
         console.log(`   ❌ Failed to generate child metadata`);
       }
