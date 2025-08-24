@@ -22,6 +22,44 @@ Your Village NFT is a **self-contained, evolving economy** — richer histories 
 
 ## 🏗 How It Works
 
+### FLOW
+
+```mermaid
+sequenceDiagram
+  %% =========================
+  %% ShapeVillage — Lifecycle
+  %% =========================
+  participant User
+  participant GenesisAI as Genesis AI
+  participant Factory as VillageFactory.sol
+  participant Village as Village.sol (ERC‑721)
+  participant CharAI as Character AI
+  participant EvoAI as Evolution Engine
+
+  %% Create Village
+  User->>GenesisAI: Describe Village + Lore
+  GenesisAI-->>User: Village image + metadata URI
+  User->>Factory: createVillage(metadataURI)
+  Factory->>Village: Deploy Village contract
+  Village-->>User: Mint Village NFT (tokenId=1)
+
+  %% Add initial two characters (description-only input)
+  User->>CharAI: Describe Character #1 + Lore
+  CharAI-->>Village: Char #1 image + metadata
+  Village->>Village: addCharacter(...) → mint to Village custody
+
+  User->>CharAI: Describe Character #2 + Lore
+  CharAI-->>Village: Char #2 image + metadata
+  Village->>Village: addCharacter(...) → mint to Village custody
+
+  %% Ongoing autonomous evolution
+  loop Periodic Evolution
+    EvoAI->>Village: Read current traits/lineage
+    EvoAI->>Village: spawn descendant with shared traits
+    Village->>Village: mint new Character (owned by Village)
+  end
+```
+
 ### 1. Mint a Village
 
 - Call the `VillageFactory` contract to create a new Village.
