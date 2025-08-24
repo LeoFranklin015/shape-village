@@ -7,7 +7,7 @@
   "regions": ["iad1"],
   "functions": {
     "app/api/**/*.ts": {
-      "runtime": "nodejs18.x"
+      "runtime": "nodejs@18.17.0"
     }
   }
 }
