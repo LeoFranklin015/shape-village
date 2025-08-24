@@ -18,8 +18,9 @@
 5. [🤖 AI Agents](#-ai-agents)  
 6. [🛠 Smart Contract](#smart-contracts-overview)  
 7. [🌍 Impact](#-impact)  
-8. [🔮 Future Scope](#-future-scope)  
-9. [🤝 Collaboration](#currently-developing-shapevillage--happy-to-collaborate)  
+8. [🔮 Future Scope](#-future-scope)
+9. [Screenshots](#-screenshots)
+10. [🤝 Collaboration](#currently-developing-shapevillage--happy-to-collaborate)  
 
 
 ## Demo
@@ -188,6 +189,21 @@ ShapeVillage creates new value for the Shape ecosystem in multiple ways:
 - **Deploy on Shape Mainnet** → Launch production contracts and apply for **Gasback incentives** to reward early adopters.  
 - **Village Wars** → Introduce PvP mechanics where Villages can compete for resources, rare characters, or prestige.  
 - **Marketplace Integration** → Enable **secondary sales** on OpenSea and other NFT marketplaces to increase liquidity for both Villages and individual Characters. 
+
+
+---
+## Screenshots
+## 📸 Screenshots
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/67e2a197-edc2-4a68-8fe2-bf14feb18787" alt="Screenshot 1" width="45%"/>
+  <img src="https://github.com/user-attachments/assets/91cb9a37-4392-4148-91b1-7fe0ae9f6562" alt="Screenshot 2" width="45%"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/69627af7-ba61-4e03-b18f-348d860361c9" alt="Screenshot 3" width="45%"/>
+     <img src="https://github.com/user-attachments/assets/01a03c53-3f6e-49e9-8af7-20932d177c60" alt="Screenshot 4" width="45%"/>
+</p>
 
 
 
