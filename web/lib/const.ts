@@ -1,5 +1,5 @@
 export const VILLAGE_FACTORY_CONTRACT_ADDRESS =
-  "0xDb487D11Ea86Fa1722313721AD4423dcfEfcFD78";
+  "0x8B386Edef0750FFFA8d15e514992E919e21dc828";
 
 export const SUBGRAPH_URL =
   "https://subgraph.satsuma-prod.com/d928402980bf/leo-franklin-johns-team--150303/example-subgraph-name/version/v0.0.3/api";

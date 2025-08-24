@@ -8,7 +8,7 @@ dataSources:
     name: VillageFactory
     network: shape-sepolia
     source:
-      address: "0xDb487D11Ea86Fa1722313721AD4423dcfEfcFD78"
+      address: "0x8B386Edef0750FFFA8d15e514992E919e21dc828"
       abi: VillageFactory
       startBlock: 18518501
     mapping:
