@@ -1,27 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function IntroScreen() {
-  const router = useRouter();
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        router.push(`/village`);
+        // Use window.location for client-side navigation
+        window.location.href = "/village";
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [router]);
-
-  const handleGetStarted = () => {
-    router.push(`/village`);
-  };
+  }, []);
 
   return (
     <div className="w-full h-screen flex overflow-hidden">
@@ -45,11 +39,8 @@ export default function IntroScreen() {
           <p className="game-text text-md text-gray-300 mb-8 leading-relaxed">
             Start a village, watch life unfold.
           </p>
-          <Link href="/village">
-            <button
-              onClick={handleGetStarted}
-              className="px-8 py-4 bg-white text-[#001428] font-semibold text-lg rounded-full hover:bg-gray-100 transition-colors duration-200 shadow-lg"
-            >
+          <Link href="/village" className="inline-block">
+            <button className="px-8 py-4 bg-white text-[#001428] font-semibold text-lg rounded-full hover:bg-gray-100 transition-colors duration-200 shadow-lg">
               Get Started
             </button>
           </Link>
