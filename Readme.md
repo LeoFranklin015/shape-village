@@ -2,6 +2,10 @@
 
 **ShapeVillage** is an **on-chain evolving world** where each **Village** is an NFT that owns its entire ecosystem of characters, lineage, and history. Instead of owning a static collectible, you own a **living, self-contained world** that grows over time.
 
+## Demo
+
+[![Watch the video](https://shapevillage.vercel.app/fav.png)](https://youtu.be/pBBbcoEWKfc)
+
 ---
 
 ## ✨ Key Idea
