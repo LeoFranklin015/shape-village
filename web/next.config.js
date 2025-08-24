@@ -20,7 +20,7 @@ const nextConfig = {
   // Disable telemetry for production builds
   telemetry: false,
   // Ensure proper output for Vercel
-  distDir: '.next',
+  distDir: ".next",
 };
 
 module.exports = nextConfig;

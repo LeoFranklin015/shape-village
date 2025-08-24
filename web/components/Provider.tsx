@@ -23,9 +23,11 @@ export default function Provider({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (!mounted) {
-    return <div className="bg-black min-h-screen flex items-center justify-center">
-      <div className="text-white">Loading...</div>
-    </div>;
+    return (
+      <div className="bg-black min-h-screen flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
   }
 
   return (
