@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function IntroScreen() {
   const router = useRouter();
@@ -44,12 +45,14 @@ export default function IntroScreen() {
           <p className="game-text text-md text-gray-300 mb-8 leading-relaxed">
             Start a village, watch life unfold.
           </p>
-          <button
-            onClick={handleGetStarted}
-            className="px-8 py-4 bg-white text-[#001428] font-semibold text-lg rounded-full hover:bg-gray-100 transition-colors duration-200 shadow-lg"
-          >
-            Get Started
-          </button>
+          <Link href="/village">
+            <button
+              onClick={handleGetStarted}
+              className="px-8 py-4 bg-white text-[#001428] font-semibold text-lg rounded-full hover:bg-gray-100 transition-colors duration-200 shadow-lg"
+            >
+              Get Started
+            </button>
+          </Link>
         </div>
       </div>
     </div>
