@@ -1,6 +1,6 @@
 export async function fetchSubgraphData() {
   const url =
-    "https://subgraph.satsuma-prod.com/d928402980bf/leo-franklin-johns-team--150303/example-subgraph-name/version/v0.0.2/api";
+    "https://subgraph.satsuma-prod.com/d928402980bf/leo-franklin-johns-team--150303/example-subgraph-name/version/v0.0.3/api";
 
   const query = `
     {

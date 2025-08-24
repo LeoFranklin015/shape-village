@@ -37,7 +37,7 @@ export function handleCharacterAdded(event: CharacterAdded): void {
     character.village = village.id;
 
     // At creation, current owner is the current village owner
-    character.currentOwner = village.owner;
+    character.currentOwner = villageAddr;
     character.createdAt = event.params.timestamp;
     character.lastSoldAt = null; // Initialize as null
   } else {
