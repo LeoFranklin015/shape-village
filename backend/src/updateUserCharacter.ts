@@ -1,8 +1,9 @@
-import { fetchSubgraphData } from "./getVillages";
+import { fetchSubgraphDataUser } from "./getVillages";
 // @ts-ignore - Pinata module import
 import { PinataSDK } from "pinata";
 
 import { VILLAGE_ABI } from "./abi";
+
 import {
   createPublicClient,
   createWalletClient,
@@ -12,10 +13,9 @@ import {
 
 import { shapeSepolia } from "viem/chains";
 import dotenv from "dotenv";
-dotenv.config();
-
 import { privateKeyToAccount } from "viem/accounts";
 import { client } from "./client";
+dotenv.config();
 
 interface Character {
   id: string;
@@ -253,12 +253,12 @@ Create a unique child character that combines traits from both parents while bei
   }
 };
 
-export const discoverNewCharacters = async () => {
+export const discoverNewCharactersUser = async (address: string) => {
   try {
     console.log("🔍 Starting character discovery process...");
 
     // Fetch all villages and their characters
-    const villages = await fetchSubgraphData();
+    const villages = await fetchSubgraphDataUser(address);
     console.log(`📊 Found ${villages.length} villages`);
 
     let totalCharacters = 0;
@@ -356,11 +356,11 @@ export const discoverNewCharacters = async () => {
   }
 };
 
-export const updateCharacters = async () => {
-  await discoverNewCharacters();
+export const updateCharacters = async (address: string) => {
+  await discoverNewCharactersUser(address);
 };
 
 // Run the discovery process
 if (require.main === module) {
-  discoverNewCharacters();
+  discoverNewCharactersUser("your address here");
 }
