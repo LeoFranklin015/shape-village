@@ -288,188 +288,80 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
                 </button>
               </div>
             )}
+            {parseInt(villageData.charactersCount) >= 2 && (
+              <div className="flex justify-between items-center">
+                <h1 className="game-text text-xl  text-[#5CA4A3] mb-4">
+                  {JSON.parse(villageData.metadataURI).name}
+                </h1>
 
+                <div className="flex gap-4 items-center">
+                  <button className="bg-[#5CA4A3] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#5CA4A3]/90 transition-colors duration-200 shadow-lg">
+                    BloodLine
+                  </button>
+
+                  {villageData.owner == address?.toLowerCase() && (
+                    <button className="bg-[#5CA4A3] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#5CA4A3]/90 transition-colors duration-200 shadow-lg">
+                      Sell Village
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
             {/* Wander Component - Shows when 2+ characters */}
             {parseInt(villageData.charactersCount) >= 2 && (
               <div className="bg-white rounded-xl shadow-lg">
-                <div className="flex h-[80vh]">
-                  {/* Wander Area - 75% width */}
-                  <div className="w-3/4 relative overflow-hidden">
-                    {/* Village Background Image */}
-                    <div className="absolute inset-0">
-                      {(() => {
-                        try {
-                          const villageMetadata = JSON.parse(
-                            villageData.metadataURI
-                          );
-                          return (
-                            <Image
-                              src={"/Village.png"}
-                              alt="Village Background"
-                              fill
-                              className="object-cover"
-                              priority
-                            />
-                          );
-                        } catch (error) {
-                          return (
-                            <div className="w-full h-full bg-gradient-to-br from-green-50 to-blue-50"></div>
-                          );
-                        }
-                      })()}
-                      {/* Overlay for better character visibility */}
-                      <div className="absolute inset-0 bg-black/20"></div>
-                    </div>
-
-                    {/* Characters */}
-                    {villageData.characters.map(
-                      (character: any, index: number) => {
-                        try {
-                          const charMetadata = JSON.parse(
-                            character.charMetadata
-                          );
-                          const position = characterPositions.find(
-                            (pos) => pos.id === character.id
-                          );
-
-                          if (!position) return null;
-
-                          return (
-                            <VillageCharacter
-                              key={character.id}
-                              character={character}
-                              position={position}
-                              isSelected={
-                                selectedCharacter?.id === character.id
-                              }
-                              onClick={() => setSelectedCharacter(character)}
-                            />
-                          );
-                        } catch (error) {
-                          return null;
-                        }
+                <div className="h-screen relative overflow-hidden">
+                  {/* Village Background Image */}
+                  <div className="absolute inset-0">
+                    {(() => {
+                      try {
+                        const villageMetadata = JSON.parse(
+                          villageData.metadataURI
+                        );
+                        return (
+                          <Image
+                            src={"/Village.png"}
+                            alt="Village Background"
+                            fill
+                            className="object-cover"
+                            priority
+                          />
+                        );
+                      } catch (error) {
+                        return (
+                          <div className="w-full h-full bg-gradient-to-br from-green-50 to-blue-50"></div>
+                        );
                       }
-                    )}
+                    })()}
+                    {/* Overlay for better character visibility */}
+                    <div className="absolute inset-0 bg-black/20"></div>
                   </div>
 
-                  {/* Character Details Panel - 25% width */}
-                  <div className="w-1/4 border-l border-gray-200 p-4 bg-gray-50">
-                    {selectedCharacter ? (
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-gray-900 text-center">
-                          Character Details
-                        </h3>
+                  {/* Characters */}
+                  {villageData.characters.map(
+                    (character: any, index: number) => {
+                      try {
+                        const charMetadata = JSON.parse(character.charMetadata);
+                        const position = characterPositions.find(
+                          (pos) => pos.id === character.id
+                        );
 
-                        {/* Character Image */}
-                        <div className="flex justify-center">
-                          <div className="relative w-20 h-20">
-                            {(() => {
-                              try {
-                                // Use the same sprite assignment logic as the wander component
-                                const characterId = selectedCharacter.id;
-                                const spriteNumber =
-                                  parseInt(characterId.slice(-1), 16) % 4;
-                                const spriteSrc =
-                                  spriteNumber === 0
-                                    ? "/1.png"
-                                    : spriteNumber === 1
-                                    ? "/2.png"
-                                    : "/3.png";
+                        if (!position) return null;
 
-                                return (
-                                  <Image
-                                    src={spriteSrc}
-                                    alt={selectedCharacter.name}
-                                    width={80}
-                                    height={80}
-                                    className="rounded-full border-2 border-[#5CA4A3] object-cover"
-                                    priority
-                                  />
-                                );
-                              } catch (error) {
-                                return (
-                                  <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-                                    <span className="text-gray-500 text-sm">
-                                      ?
-                                    </span>
-                                  </div>
-                                );
-                              }
-                            })()}
-                          </div>
-                        </div>
-
-                        {/* Character Info */}
-                        <div className="text-center">
-                          <h4 className="font-bold text-gray-900 text-lg">
-                            {selectedCharacter.name}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {(() => {
-                              try {
-                                const charMetadata = JSON.parse(
-                                  selectedCharacter.charMetadata
-                                );
-                                return charMetadata.description;
-                              } catch (error) {
-                                return "Description not available";
-                              }
-                            })()}
-                          </p>
-                        </div>
-
-                        {/* Character Attributes */}
-                        {(() => {
-                          try {
-                            const charMetadata = JSON.parse(
-                              selectedCharacter.charMetadata
-                            );
-                            if (
-                              charMetadata.attributes &&
-                              charMetadata.attributes.length > 0
-                            ) {
-                              return (
-                                <div className="space-y-2">
-                                  <h5 className="text-sm font-medium text-gray-700">
-                                    Attributes
-                                  </h5>
-                                  <div className="space-y-1">
-                                    {charMetadata.attributes.map(
-                                      (attr: any, index: number) => (
-                                        <div
-                                          key={index}
-                                          className="flex justify-between text-xs"
-                                        >
-                                          <span className="text-gray-600">
-                                            {attr.trait_type}:
-                                          </span>
-                                          <span className="text-gray-900 font-medium">
-                                            {attr.value}
-                                          </span>
-                                        </div>
-                                      )
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return null;
-                          } catch (error) {
-                            return null;
-                          }
-                        })()}
-                      </div>
-                    ) : (
-                      <div className="text-center text-gray-500 py-8">
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <span className="text-gray-400">👤</span>
-                        </div>
-                        <p className="text-sm">
-                          Click on a character to view details
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                        return (
+                          <VillageCharacter
+                            key={character.id}
+                            character={character}
+                            position={position}
+                            isSelected={selectedCharacter?.id === character.id}
+                            onClick={() => setSelectedCharacter(character)}
+                          />
+                        );
+                      } catch (error) {
+                        return null;
+                      }
+                    }
+                  )}
                 </div>
               </div>
             )}
@@ -574,6 +466,131 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
                   ) : (
                     "Create Character"
                   )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Character Details Modal */}
+      {selectedCharacter && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 backdrop-blur-sm"
+            onClick={() => setSelectedCharacter(null)}
+          ></div>
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-scroll border border-gray-200">
+            {/* Modal Header */}
+            <div className="bg-[#5CA4A3] text-white px-6 py-4">
+              <h2 className="text-xl font-bold text-center">
+                Character Details
+              </h2>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <div className="space-y-4">
+                {/* Character Image */}
+                <div className="flex justify-center">
+                  <div className="relative w-24 h-24">
+                    {(() => {
+                      try {
+                        const charMetadata = JSON.parse(
+                          selectedCharacter.charMetadata
+                        );
+                        return (
+                          <Image
+                            src={charMetadata.image}
+                            alt={selectedCharacter.name}
+                            width={96}
+                            height={96}
+                            className="rounded-full border-2 border-[#5CA4A3] object-cover"
+                            priority
+                          />
+                        );
+                      } catch (error) {
+                        return (
+                          <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                            <span className="text-gray-500 text-sm">?</span>
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
+                </div>
+
+                {/* Character Info */}
+                <div className="text-center">
+                  <h3 className="font-bold text-gray-900 text-xl mb-2">
+                    {selectedCharacter.name}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {(() => {
+                      try {
+                        const charMetadata = JSON.parse(
+                          selectedCharacter.charMetadata
+                        );
+                        return charMetadata.description;
+                      } catch (error) {
+                        return "Description not available";
+                      }
+                    })()}
+                  </p>
+                </div>
+
+                {/* Character Attributes */}
+                {(() => {
+                  try {
+                    const charMetadata = JSON.parse(
+                      selectedCharacter.charMetadata
+                    );
+                    if (
+                      charMetadata.attributes &&
+                      charMetadata.attributes.length > 0
+                    ) {
+                      return (
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-medium text-gray-700 text-center">
+                            Attributes
+                          </h4>
+                          <div className="space-y-2">
+                            {charMetadata.attributes.map(
+                              (attr: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className="flex justify-between text-sm p-2 bg-gray-50 rounded-lg"
+                                >
+                                  <span className="text-gray-600 font-medium">
+                                    {attr.trait_type}:
+                                  </span>
+                                  <span className="text-gray-900 font-semibold">
+                                    {attr.value}
+                                  </span>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  } catch (error) {
+                    return null;
+                  }
+                })()}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex justify-center mt-6 pt-6 border-t border-gray-200">
+                <button
+                  onClick={() => setSelectedCharacter(null)}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium"
+                >
+                  Close
                 </button>
               </div>
             </div>
