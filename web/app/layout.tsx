@@ -7,7 +7,6 @@ import Provider from "@/components/Provider";
 export const metadata: Metadata = {
   title: "RETRO WANDER",
   description: "Characters wandering around Berlin",
-  manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",

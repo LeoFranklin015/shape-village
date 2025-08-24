@@ -1,22 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function IntroScreen() {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
-        // Use window.location for client-side navigation
-        window.location.href = "/village";
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
   return (
     <div className="w-full h-screen flex overflow-hidden">
       {/* Background with Berlin skyline */}
