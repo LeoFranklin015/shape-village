@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./Character.sol";
 
 contract Village is Ownable,ERC721Holder {
@@ -45,10 +46,12 @@ contract Village is Ownable,ERC721Holder {
         uint256 timestamp
     );
 
-    constructor(string memory _metadataURI, address creator) Ownable(creator) {
+    constructor(string memory _metadataURI, address creator) Ownable(creator) 
+    // ERC721("Village", "VILLAGE")
+     {
         metadataURI = _metadataURI;
         _transferOwnership(creator);
-
+        // _mint(creator, 1);
     }
 
     function addCharacter(string memory name, string memory symbol, string memory charMetadata, address[] memory parents) external onlyOwner returns (address) {
@@ -92,17 +95,19 @@ contract Village is Ownable,ERC721Holder {
 
     // Override transferOwnership to emit custom event
     function transferOwnership(address newOwner) public virtual override onlyOwner {
-        address oldOwner = owner();
-        super.transferOwnership(newOwner);
-        
-        // Emit custom ownership transfer event
-        emit VillageOwnershipTransferred(
-            address(this),
-            oldOwner,
-            newOwner,
-            block.timestamp
-        );
-    }
+            address oldOwner = owner();
+            // _transfer(oldOwner, newOwner, 1);
+            super.transferOwnership(newOwner);
+         
+            // Emit custom ownership transfer event
+            emit VillageOwnershipTransferred(
+                address(this),
+                oldOwner,
+                newOwner,
+                block.timestamp
+            );
+            
+        }
 
     // Function to update village metadata (only owner)
     function updateMetadata(string memory newMetadataURI) external onlyOwner {
