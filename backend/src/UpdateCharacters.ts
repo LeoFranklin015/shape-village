@@ -252,7 +252,7 @@ Create a unique child character that combines traits from both parents while bei
   }
 };
 
-const discoverNewCharacters = async () => {
+export const discoverNewCharacters = async () => {
   try {
     console.log("🔍 Starting character discovery process...");
 

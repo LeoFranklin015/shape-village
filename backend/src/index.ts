@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { discoverNewCharacters } from "./UpdateCharacters";
 
 // Load environment variables
 dotenv.config();
@@ -13,10 +14,10 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.get("/api/villages", (req, res) => {
+app.get("/api/interact", async (req, res) => {
+  await discoverNewCharacters();
   res.json({
-    message: "Get all villages",
-    data: [],
+    message: "Created a new charcater. Check your Village",
   });
 });
 

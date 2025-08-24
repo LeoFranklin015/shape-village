@@ -4,6 +4,7 @@
 
 ## Demo
 
+click the thumbnail
 [![Watch the video](https://shapevillage.vercel.app/fav.png)](https://youtu.be/pBBbcoEWKfc)
 
 ---

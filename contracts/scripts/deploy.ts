@@ -42,6 +42,10 @@ async function main() {
     console.log(`Address: ${villageFactoryAddress}`);
 
     console.log("🔍 You can now verify your contract on the block explorer");
+
+    // Apply for gasback in mainnet
+    // const gasback = await ethers.getContractAt("Gasback", gasbackAddress);
+    // const tx = await gasback.register(deployer.address, villageFactoryAddress);
   } catch (error) {
     console.error("❌ Deployment failed:", error);
     process.exit(1);
