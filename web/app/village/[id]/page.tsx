@@ -23,6 +23,9 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPositions, setCharacterPositions] = useState<any[]>([]);
   const [isBloodlineModalOpen, setIsBloodlineModalOpen] = useState(false);
+  const [isSellVillageModalOpen, setIsSellVillageModalOpen] = useState(false);
+  const [buyerAddress, setBuyerAddress] = useState("");
+  const [isSellingVillage, setIsSellingVillage] = useState(false);
 
   const fetchVillageDetails = async () => {
     if (!id) return;
@@ -180,6 +183,46 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   };
 
+  const handleSellVillage = async () => {
+    if (!buyerAddress.trim() || !address) {
+      return;
+    }
+
+    setIsSellingVillage(true);
+
+    try {
+      // Transfer village ownership to buyer
+      const tx = await walletClient?.writeContract({
+        address: id as `0x${string}`,
+        abi: VILLAGE_ABI,
+        functionName: "transferOwnership",
+        args: [buyerAddress as `0x${string}`],
+        account: address as `0x${string}`,
+      });
+
+      console.log("Sell village transaction:", tx);
+
+      await client.waitForTransactionReceipt({
+        hash: tx as `0x${string}`,
+      });
+
+      // Refresh village data
+      await fetchVillageDetails();
+
+      // Close modal and reset form
+      setIsSellVillageModalOpen(false);
+      setBuyerAddress("");
+
+      // Show success message or redirect
+      alert("Village sold successfully!");
+    } catch (err) {
+      console.error("Error selling village:", err);
+      setError("Failed to sell village");
+    } finally {
+      setIsSellingVillage(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="w-full min-h-screen bg-gradient-to-br from-[#B9EAFD] to-[#F3FAFF]">
@@ -305,7 +348,10 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
                   </button>
 
                   {villageData.owner == address?.toLowerCase() && (
-                    <button className="bg-[#5CA4A3] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#5CA4A3]/90 transition-colors duration-200 shadow-lg">
+                    <button
+                      onClick={() => setIsSellVillageModalOpen(true)}
+                      className="bg-[#5CA4A3] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#5CA4A3]/90 transition-colors duration-200 shadow-lg"
+                    >
                       Sell Village
                     </button>
                   )}
@@ -628,6 +674,98 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
         onClose={() => setIsBloodlineModalOpen(false)}
         characters={villageData?.characters || []}
       />
+
+      {/* Sell Village Modal */}
+      {isSellVillageModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 backdrop-blur-sm bg-black/50"
+            onClick={() => setIsSellVillageModalOpen(false)}
+          ></div>
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden border border-gray-200">
+            {/* Modal Header */}
+            <div className="bg-[#5CA4A3] text-white px-6 py-4">
+              <h2 className="text-xl font-bold text-center">Sell Village</h2>
+              <p className="text-center text-blue-100 mt-1">
+                Transfer ownership to another address
+              </p>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <div className="space-y-4">
+                {/* Buyer Address Input */}
+                <div>
+                  <label
+                    htmlFor="buyerAddress"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Buyer Address
+                  </label>
+                  <input
+                    id="buyerAddress"
+                    type="text"
+                    value={buyerAddress}
+                    onChange={(e) => setBuyerAddress(e.target.value)}
+                    placeholder="Enter the buyer's wallet address..."
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5CA4A3] focus:border-[#5CA4A3] font-mono text-sm text-black"
+                  />
+                </div>
+
+                {/* Warning Message */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <span className="text-yellow-400 text-lg">⚠️</span>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">
+                        Important
+                      </h3>
+                      <p className="text-sm text-yellow-700 mt-1">
+                        This action will permanently transfer village ownership.
+                        Make sure you have the correct buyer address.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                <button
+                  onClick={() => setIsSellVillageModalOpen(false)}
+                  className="px-6 py-3 rounded-full text-gray-600 bg-gray-200  hover:bg-gray-300 transition-colors duration-200 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSellVillage}
+                  disabled={
+                    isSellingVillage ||
+                    !buyerAddress.trim() ||
+                    !buyerAddress.startsWith("0x") ||
+                    buyerAddress.length !== 42
+                  }
+                  className="px-6 py-3 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all duration-200 font-medium shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isSellingVillage ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Selling...
+                    </>
+                  ) : (
+                    "Sell Village"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
