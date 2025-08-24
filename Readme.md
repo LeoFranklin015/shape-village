@@ -16,7 +16,7 @@
    - [6. AI Interaction within each other](#6-ai-interaction-within-each-other)  
 4. [🔮 Features](#-features)  
 5. [🤖 AI Agents](#-ai-agents)  
-6. [🛠 Technical Excellence](#smart-contracts-overview)  
+6. [🛠 Smart Contract](#smart-contracts-overview)  
 7. [🌍 Impact](#-impact)  
 8. [🔮 Future Scope](#-future-scope)  
 9. [🤝 Collaboration](#currently-developing-shapevillage--happy-to-collaborate)  
@@ -164,7 +164,7 @@ These agents are adaptive — they read **on-chain state** (e.g., which characte
 ---
 
 
-**Smart Contracts Overview**  
+## Smart Contracts Overview 
 - **`VillageFactory.sol`** → Factory contract that deploys new Village contracts.  
 - **`Village.sol`** → An ERC-721 contract representing the Village NFT. Acts as a **container and manager** for all characters within the Village.  
 - **`Character.sol`** → ERC-721 contract for individual characters. Each character is minted into the custody of its Village by default.  
