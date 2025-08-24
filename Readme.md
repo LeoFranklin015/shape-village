@@ -33,7 +33,7 @@ sequenceDiagram
   participant GenesisAI as Genesis AI
   participant Factory as VillageFactory.sol
   participant Village as Village.sol (ERC‑721)
-  participant CharAI as Character AI
+  participant CharAI as Character AI & Character.sol (ERC‑721)
   participant EvoAI as Evolution Engine
 
   %% Create Village
@@ -90,10 +90,20 @@ sequenceDiagram
 
 - **Transfer the Village NFT → transfer the entire ecosystem**.
 - **Village Owner** can:
-  - Spawn new characters
-  - Update metadata
+
   - Sell characters individually (optional liquidity path)
   - Or sell the entire Village NFT, including its whole lineage
+
+  ```mermaid
+  flowchart LR
+    User["👤 User"] -->|Owns| VillageNFT["🏡 Village NFT (ERC-721)"]
+    VillageNFT -->|Owns| Characters["🧑‍🤝‍🧑 Character NFTs"]
+
+    %% Trading options
+    User -.->|Can sell entire Village| BuyerVillage["👤 Another User (buys Village)"]
+    Characters -.->|Can be sold individually| BuyerChar["👤 Another User (buys Character)"]
+
+  ```
 
 ---
 
