@@ -5,14 +5,14 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Provider from "@/components/Provider";
 
 export const metadata: Metadata = {
-  title: "RETRO WANDER",
-  description: "Characters wandering around Berlin",
+  title: "ShapeVillage",
+  description: "Start a village, watch life unfold.",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/favicon.ico",
   },
-  generator: "v0.app",
+  generator: "ShapeVillage",
 };
 
 export default function RootLayout({
