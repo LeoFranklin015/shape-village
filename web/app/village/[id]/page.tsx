@@ -7,6 +7,7 @@ import Image from "next/image";
 import { client, walletClient } from "@/lib/client";
 import { VILLAGE_ABI } from "@/lib/const";
 import VillageCharacter from "@/components/VillageCharacter";
+import BloodlineModal from "@/components/BloodlineModal";
 
 const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = React.use(params);
@@ -21,6 +22,7 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [showHammer, setShowHammer] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<any>(null);
   const [characterPositions, setCharacterPositions] = useState<any[]>([]);
+  const [isBloodlineModalOpen, setIsBloodlineModalOpen] = useState(false);
 
   const fetchVillageDetails = async () => {
     if (!id) return;
@@ -295,7 +297,10 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
                 </h1>
 
                 <div className="flex gap-4 items-center">
-                  <button className="bg-[#5CA4A3] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#5CA4A3]/90 transition-colors duration-200 shadow-lg">
+                  <button
+                    onClick={() => setIsBloodlineModalOpen(true)}
+                    className="bg-[#5CA4A3] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#5CA4A3]/90 transition-colors duration-200 shadow-lg"
+                  >
                     BloodLine
                   </button>
 
@@ -616,6 +621,13 @@ const VillageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
         </div>
       )}
+
+      {/* Bloodline Modal */}
+      <BloodlineModal
+        isOpen={isBloodlineModalOpen}
+        onClose={() => setIsBloodlineModalOpen(false)}
+        characters={villageData?.characters || []}
+      />
     </div>
   );
 };
