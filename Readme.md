@@ -109,8 +109,20 @@ sequenceDiagram
     Characters -.->|Can be sold individually| BuyerChar["👤 Another User (buys Character)"]
 
   ```
+### 6. AI Interaction within each other
 
+A dedicated function was built to simulate **AI characters interacting with each other** and producing new descendants.  
+Due to limited AI credits, the system does not run fully autonomously yet — instead, you can manually trigger an interaction.
+
+check [here](https://github.com/LeoFranklin015/shape-village/backend/src/)
+
+**How to trigger character interaction:**
+
+```bash
+curl https://shape-village.onrender.com/api/interact/"your_address"
+```
 ---
+
 
 ## 🔮 Features
 
